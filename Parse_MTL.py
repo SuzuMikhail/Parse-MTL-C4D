@@ -5,9 +5,10 @@ Description-US:Run this script after importing an .obj file. It will parse the .
 Description-DE:Starten Sie dieses Skript nach dem Import einer OBJ-Datei. Es wird eine MTL-Datei einlesen und die Materialien bauen.
 
 
-ImportMTL 1.1.3
+ImportMTL 1.1.4
 ===============
 2013 by www.c4d-jack.de
+2022 fixed by Suzu Mikhail
 
 
 Description
@@ -45,6 +46,9 @@ Changelog
 1.1.3
 - Linked to absolute file paths. May need to make a toggle.
 - Turn off specularity channel if the value is 0.
+
+1.1.4
+- Fixed by Suzu Mikhail for Cinema 4D R25
 
 """
 
@@ -130,7 +134,7 @@ MTL_KEYWORDS_USE = {
 # Print a string, if debug mode is enabled
 def DebugPrint(s):
     if ENABLE_DEBUG:
-        print s
+        print(s)
 
 
 # Get the path component from a path
@@ -224,7 +228,7 @@ def InsertTexture(fBase, fName, matName, targetId, targetDoc):
 
 # Iterate lines of .mtl file, extract data, insert data into document
 def ParseFile(fName, targetDoc):
-    print 'Parsing ' + fName + '...'
+    print('Parsing ' + fName + '...')
     
     # Veriables
     basePath = GetPath(fName)
@@ -261,7 +265,7 @@ def ParseFile(fName, targetDoc):
         # Check for maps
         elif words[0] in MTL_KEYWORDS_MAP:
             if matName == '':
-                print '  PARSER ERROR (line ' + str(lineNr) + '): MAP ' + words[0] + ' OUTSIDE OF MATERIAL!'
+                print('  PARSER ERROR (line ' + str(lineNr) + '): MAP ' + words[0] + ' OUTSIDE OF MATERIAL!')
                 continue
             else:
                 targetChannel = MTL_KEYWORDS_MAP[words[0]]
@@ -274,33 +278,33 @@ def ParseFile(fName, targetDoc):
         elif words[0] in MTL_KEYWORDS_COLOR:
             color = c4d.Vector()
             if matName == '':
-                print '  PARSER ERROR (line ' + str(lineNr) + '): COLOR OUTSIDE OF MATERIAL!'
+                print('  PARSER ERROR (line ' + str(lineNr) + '): COLOR OUTSIDE OF MATERIAL!')
                 continue
             else:
                 try:
                     targetId = MTL_KEYWORDS_COLOR[words[0]]
                     color = c4d.Vector(float(words[1]), float(words[2]), float(words[3]))
-                    print'  Found ' + MTL_KEYWORDS_NAMES[targetId] + ': ' + str(color)
+                    print('  Found ' + MTL_KEYWORDS_NAMES[targetId] + ': ' + str(color))
                     SetMatProperty(matName, color, targetId, targetDoc)
                 except ValueError:
-                    print '  PARSER ERROR (line ' + str(lineNr) + '): COLOR ' + words[0] + ' COULD NOT BE PARSED!'
+                    print('  PARSER ERROR (line ' + str(lineNr) + '): COLOR ' + words[0] + ' COULD NOT BE PARSED!')
         
         # Check for float values
         elif words[0] in MTL_KEYWORDS_PROP:
             if matName == '':
-                print '  PARSER ERROR (line ' + str(lineNr) + '): PROPERTY ' + words[0] + ' OUTSIDE OF MATERIAL!'
+                print('  PARSER ERROR (line ' + str(lineNr) + '): PROPERTY ' + words[0] + ' OUTSIDE OF MATERIAL!')
                 continue
             else:
                 try:
                     targetId = MTL_KEYWORDS_PROP[words[0]]
                     value = float(words[-1])
-                    print'  Found ' + MTL_KEYWORDS_NAMES[targetId] + ': ' + str(value)
+                    print('  Found ' + MTL_KEYWORDS_NAMES[targetId] + ': ' + str(value))
                     SetMatProperty(matName, value, targetId, targetDoc)
                 except ValueError:
-                    print '  PARSER ERROR (line ' + str(lineNr) + '): PROPERTY COULD NOT BE PARSED!'
+                    print('  PARSER ERROR (line ' + str(lineNr) + '): PROPERTY COULD NOT BE PARSED!')
         
     targetDoc.EndUndo()
-    print ' \nDone. Parsed ' + str(lineNr) + ' and found ' + str(matCount) + ' materials with ' + str(mapCount) + ' texture maps'
+    print(' \nDone. Parsed ' + str(lineNr) + ' and found ' + str(matCount) + ' materials with ' + str(mapCount) + ' texture maps')
     fl.close()
     c4d.EventAdd()
 
@@ -309,7 +313,8 @@ def main():
     fn = ''
     fn = storage.LoadDialog(c4d.FILESELECTTYPE_ANYTHING, 'Open .mtl file', c4d.FILESELECT_LOAD, 'mtl')
     if fn != None and fn != '':
-        ParseFile(fn.decode("utf8"), doc)
+        #ParseFile(fn.decode("utf8"), doc)
+        ParseFile(fn, doc)
         DebugPrint(' ')
 
 
